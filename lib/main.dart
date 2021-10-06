@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 void main() {
   runApp(const MyApp());
@@ -53,9 +54,30 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     WidgetsBinding.instance?.addPostFrameCallback((timeStamp) {
       wheel.position.isScrollingNotifier.addListener(() {
-        wheel.animateTo(300,
-            duration: const Duration(seconds: 10000),
-            curve: Curves.easeOutCubic);
+        bool scrollStopped = !wheel.position.isScrollingNotifier.value;
+        if (scrollStopped && wheel.position.pixels < 300) {
+          if (wheel.position.pixels > 0 && wheel.position.pixels < 300 / 6) {
+            wheel.animateTo(0,
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeOutCubic);
+          } else if (wheel.position.pixels > (5 * 300) / 6 &&
+              wheel.position.pixels < 300) {
+            wheel.animateTo(300,
+                duration: const Duration(milliseconds: 1000),
+                curve: Curves.easeOutCubic);
+          } else if (wheel.position.pixels > 300 / 6 &&
+              wheel.position.pixels < (5 * 300) / 6) {
+            if (wheel.position.userScrollDirection == ScrollDirection.reverse) {
+              wheel.animateTo(300,
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.bounceOut);
+            } else {
+              wheel.animateTo(0,
+                  duration: const Duration(milliseconds: 1000),
+                  curve: Curves.bounceOut);
+            }
+          }
+        }
       });
     });
     super.initState();
